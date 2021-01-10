@@ -24,5 +24,5 @@ fork in run := true
 PB.protoSources in Compile := Seq(baseDirectory.value / "proto")
 PB.targets in Compile := Seq(
   scalapb.gen() -> ((sourceManaged in Compile).value),
-  RpcRedirectCodeGen -> ((sourceManaged in Compile).value)
+  GrpcRedirectCodeGen -> ((sourceManaged in Compile).value)
 )

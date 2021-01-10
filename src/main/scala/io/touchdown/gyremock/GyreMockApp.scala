@@ -2,11 +2,13 @@ package io.touchdown.gyremock
 
 import com.typesafe.scalalogging.StrictLogging
 
-object GrpcMockApp extends StrictLogging with App {
+import scala.concurrent.ExecutionContext.Implicits.global
+
+object GyreMockApp extends StrictLogging with App {
 
   val httpMock = new HttpMock()(scala.concurrent.ExecutionContext.global)
 
-  val services = GyreMocks.build(httpMock)
+  val services = ServicesBuilder.build(httpMock)
 
   httpMock.init()
   private val server = new GrpcServer(services).start(50000)

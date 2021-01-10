@@ -2,7 +2,7 @@ import scalapb.compiler.Version
 
 name := "gyremock"
 
-version := "0.1.1"
+version := "0.2.0"
 
 scalaVersion := "2.12.11"
 
@@ -13,8 +13,6 @@ libraryDependencies ++= Seq(
   "com.github.tomakehurst" % "wiremock-standalone" % "2.27.2",
   // runtime classpath not found on scalapb/Message
   "com.thesamet.scalapb" %% "scalapb-json4s" % "0.10.2",
-  "com.google.protobuf" % "protobuf-java-util" % Version.protobufVersion,
-  //"io.grpc" % "protoc-gen-grpc-java" % Version.grpcJavaVersion asProtocPlugin(),
   "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.1",
   "org.scalatest" %% "scalatest" % "3.1.0" % Test
 )

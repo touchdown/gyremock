@@ -1,0 +1,11 @@
+# In .dockerignore
+# Exclude everything:
+#
+*
+
+# Now un-exclude package.json and the app folder:
+#
+!src
+!project/plugins.sbt
+!project/RpcRedirectCodeGen.scala
+!build.sbt

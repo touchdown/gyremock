@@ -1,2 +1,4 @@
-# giremock
-grpc wrapper for wiremock
+# hermes
+grpc translator wrapper for wiremock
+
+

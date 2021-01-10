@@ -1,2 +1,10 @@
 *.class
 *.log
+
+.bsp
+.idea
+
+target/
+lib/
+proto/
+wiremock/

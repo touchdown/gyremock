@@ -10,7 +10,7 @@ import com.github.tomakehurst.wiremock.common.Slf4jNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
 import com.typesafe.scalalogging.StrictLogging
-import scalapb.{GeneratedMessage, GeneratedMessageCompanion, Message}
+import scalapb.{GeneratedMessage, GeneratedMessageCompanion}
 import scalapb.json4s.{Parser, Printer}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -29,7 +29,7 @@ object HttpMock extends StrictLogging {
   private lazy val SERVER = new WireMockServer(config)
 }
 
-class HttpMock(wiremockHost: Option[String], jsPrinter: Printer, jsParser: Parser)(implicit ec: ExecutionContext) extends StrictLogging {
+class HttpMock(wiremockHost: Option[String], jsPrinter: Printer, jsParser: Parser) extends StrictLogging {
   import HttpMock._
 
   private val targetBaseUrl = s"http://${wiremockHost.getOrElse(SERVER.baseUrl)}:$port"
@@ -38,7 +38,7 @@ class HttpMock(wiremockHost: Option[String], jsPrinter: Printer, jsParser: Parse
 
   def destroy(): Unit = if (wiremockHost.isEmpty && SERVER.isRunning) SERVER.stop()
 
-  def send[I <: GeneratedMessage, O <: GeneratedMessage with Message[O] : GeneratedMessageCompanion](message: I, path: String): Future[O] = {
+  def send[I <: GeneratedMessage, O <: GeneratedMessage : GeneratedMessageCompanion](message: I, path: String)(implicit ec: ExecutionContext): Future[O] = {
     val json = jsPrinter.print(message)
     logger.info("received raw message:\n{}\njson:\n{}", message.toProtoString, json)
     val request = HttpRequest.newBuilder

@@ -1,26 +1,39 @@
 package dev.touchdown.gyremock
 
-import com.typesafe.config.ConfigFactory
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.stream.{ActorMaterializer, Materializer}
 import com.typesafe.scalalogging.StrictLogging
 import scalapb.json4s.{Parser, Printer}
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
 object GyreMockApp extends StrictLogging with App {
-
-  val config = ConfigFactory.load()
-  val wiremockHost = Some(config.getString("gyremock.wiremock.host")).filter(_.nonEmpty)
-
+  // Important: enable HTTP/2 in ActorSystem's config
+  // We do it here programmatically, but you can also set it in the application.conf
+  val system = ActorSystem("GyreMockApp")
+  val wiremockBaseUrl = Some(system.settings.config.getString("gyremock.wiremock.host")).filter(_.nonEmpty)
   val printer = new Printer().includingDefaultValueFields
   val parser = new Parser()
-  val httpMock = new HttpMock(wiremockHost, printer, parser)
+  val httpMock = new HttpMock(wiremockBaseUrl, printer, parser)
+  new GyreMockApp(system, httpMock).run()
+  if (wiremockBaseUrl.isEmpty){
+    httpMock.init()
+    system.registerOnTermination(httpMock.destroy())
+  }
+  // ActorSystem threads will keep the app alive until `system.terminate()` is called
+}
 
-  val services = ServicesBuilder.build(httpMock)
-  val server = new GrpcServer(services).start(50000)
+class GyreMockApp(system: ActorSystem, httpMock: HttpMock) {
+  def run(): Future[Http.ServerBinding] = {
+    // Akka boot up code
+    implicit val sys: ActorSystem = system
+    implicit val ec: ExecutionContext = sys.dispatcher
 
-  httpMock.init()
-  server.awaitTermination()
-  server.shutdown().awaitTermination()
-  httpMock.destroy()
-
+    val services = ServicesBuilder.build(httpMock)
+    val server = new AkkaGrpcServer(services).start(50000)
+    // report successful binding
+    server.foreach { binding => println(s"gRPC server bound to: ${binding.localAddress}") }
+    server
+  }
 }

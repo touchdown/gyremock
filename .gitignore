@@ -5,6 +5,6 @@
 .idea
 
 target/
-lib/
-proto/
-wiremock/
+/lib
+/proto
+/wiremock

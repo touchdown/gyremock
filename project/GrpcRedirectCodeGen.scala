@@ -28,15 +28,17 @@ object GrpcRedirectCodeGen extends ProtocCodeGenerator {
       filesByName(name).getServices.asScala
     )
 
+    val resp = generateServicesBuilder(serviceDs.toList, implicits)
     (if (serviceDs.nonEmpty){
       val services = serviceDs.map(sd => generateService(sd, implicits))
       val builder = CodeGeneratorResponse.newBuilder().addAllFile(services.asJava)
-      val resp = generateServicesBuilder(serviceDs.toList, implicits)
       builder
         .addFile(resp)
         .build()
     }else{
-      CodeGeneratorResponse.getDefaultInstance
+      CodeGeneratorResponse.newBuilder()
+        .addFile(resp)
+        .build()
     }).toByteArray
   }
 
@@ -56,7 +58,7 @@ object GrpcRedirectCodeGen extends ProtocCodeGenerator {
   private def generateServicesBuilder(services: immutable.Seq[ServiceDescriptor], implicits: DescriptorImplicits): CodeGeneratorResponse.File = {
     import implicits._
 
-    val p = new PackageCodeGenerator(services.map(s => s"${s.getFile.scalaPackageName}.${s.objectName}"))
+    val p = new ServicesBuilderCodeGenerator(services.map(s => s"${s.getFile.scalaPackageName}.${s.objectName}"))
     val code = p.run()
     val b = CodeGeneratorResponse.File.newBuilder()
     b.setName("io/touchdown/gyremock/ServicesBuilder.scala")
@@ -79,8 +81,7 @@ object GrpcRedirectCodeGen extends ProtocCodeGenerator {
 }
 
 
-final private class PackageCodeGenerator(services: immutable.Seq[String]) {
-
+final private class ServicesBuilderCodeGenerator(services: immutable.Seq[String]) {
   def run(): String = {
     new FunctionalPrinter()
       .call(addPackageClause)

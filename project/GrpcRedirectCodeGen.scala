@@ -94,7 +94,7 @@ final private class PackageCodeGenerator(services: immutable.Seq[String]) {
 
 
   private def addPackageClause(printer: FunctionalPrinter): FunctionalPrinter = {
-    printer.add("package io.touchdown.gyremock")
+    printer.add("package dev.touchdown.gyremock")
   }
 
   private def addImportStatements(printer: FunctionalPrinter): FunctionalPrinter = {
@@ -154,7 +154,7 @@ final private class RpcLibCodeGenerator(service: ServiceDescriptor, implicits: D
 
   private def addImportStatements(printer: FunctionalPrinter): FunctionalPrinter = {
     val libraryImports = Seq(
-      "io.touchdown.gyremock.HttpMock",
+      "dev.touchdown.gyremock.HttpMock",
       "io.grpc._",
       "io.grpc.stub._",
       "scalapb.grpc._",

@@ -1,4 +1,4 @@
-package io.touchdown.gyremock
+package dev.touchdown.gyremock
 
 import com.typesafe.scalalogging.StrictLogging
 

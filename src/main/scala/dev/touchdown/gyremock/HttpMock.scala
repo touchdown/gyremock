@@ -1,4 +1,4 @@
-package io.touchdown.gyremock
+package dev.touchdown.gyremock
 
 import java.io.IOException
 import java.net.URI
@@ -29,7 +29,7 @@ object HttpMock {
 }
 
 class HttpMock(implicit ec: ExecutionContext) extends StrictLogging {
-  import io.touchdown.gyremock.HttpMock.SERVER
+  import dev.touchdown.gyremock.HttpMock.SERVER
 
   def init(): Unit = {
     if (!SERVER.isRunning) SERVER.start()

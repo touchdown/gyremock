@@ -1,12 +1,15 @@
 package dev.touchdown.gyremock
 
 import com.typesafe.scalalogging.StrictLogging
+import scalapb.json4s.{Parser, Printer}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object GyreMockApp extends StrictLogging with App {
 
-  val httpMock = new HttpMock()(scala.concurrent.ExecutionContext.global)
+  val printer = new Printer().includingDefaultValueFields
+  val parser = new Parser()
+  val httpMock = new HttpMock(printer, parser)(scala.concurrent.ExecutionContext.global)
 
   val services = ServicesBuilder.build(httpMock)
 

@@ -12,7 +12,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
 import com.typesafe.scalalogging.StrictLogging
 import scalapb.{GeneratedMessage, GeneratedMessageCompanion, Message}
-import scalapb.json4s.JsonFormat
+import scalapb.json4s.{Parser, Printer}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.compat.java8.FutureConverters._
@@ -28,7 +28,7 @@ object HttpMock {
   private val SERVER = new WireMockServer(config)
 }
 
-class HttpMock(implicit ec: ExecutionContext) extends StrictLogging {
+class HttpMock(jsonPrinter: Printer, parser: Parser)(implicit ec: ExecutionContext) extends StrictLogging {
   import dev.touchdown.gyremock.HttpMock.SERVER
 
   def init(): Unit = {
@@ -42,7 +42,7 @@ class HttpMock(implicit ec: ExecutionContext) extends StrictLogging {
   @throws[IOException]
   @throws[InterruptedException]
   def send[I <: GeneratedMessage, O <: GeneratedMessage with Message[O] : GeneratedMessageCompanion](message: I, path: String): Future[O] = {
-    val json =  JsonFormat.toJsonString(message)
+    val json =  jsonPrinter.print(message)
     logger.info("received raw message:\n{}\njson:\n{}", message.toProtoString, json)
     val request = HttpRequest.newBuilder
       .uri(URI.create(SERVER.baseUrl + path))
@@ -52,7 +52,7 @@ class HttpMock(implicit ec: ExecutionContext) extends StrictLogging {
       .newHttpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString)
       .toScala
       .map{r =>
-        val resp = Try(JsonFormat.fromJsonString[O](r.body()))
+        val resp = Try(parser.fromJsonString[O](r.body()))
         resp.fold(
           ex => logger.error("failed to parse into protos", ex),
           m => logger.info("resp proto:\n{}", m.toProtoString)

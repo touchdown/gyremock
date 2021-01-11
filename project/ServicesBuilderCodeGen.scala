@@ -112,7 +112,4 @@ final private class ObjectCodeGenerator(services: immutable.Seq[Service]) {
       .add("}")
       .newline
   }
-
-
-
 }

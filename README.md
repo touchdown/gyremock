@@ -10,15 +10,16 @@ From proto files, it runs code gen to generate implementations for those protos 
 ## Quick Usage
 1) Run 
 ```posh
-docker run -p 8888:8888 -p 50000:50000 -v $(pwd)/example/proto:/opt/gyremock/proto -v $(pwd)/example/wiremock:/opt/gyremock/wiremock touchdown/gyremock:<version>
+docker run -p 18080:18080 -p 50000:50000 -v $(pwd)/example/proto:/opt/gyremock/proto -v $(pwd)/example/wiremock:/opt/gyremock/wiremock touchdown/gyremock:<version>
 ```
 Optionally
+* one can add remote wiremock host like `-e WIREMOCK_HOST=host.docker.internal` for a locally port-forwarded connection
 * one can add java opts like `-e JAVA_OPTS="-XX:+UseG1GC -Xms1G -Xmx4G -Xss2M"` for large amounts of proto files
-* one can also add extra jars like `-v $(pwd)/<lib>:/opt/gyremock/lib` if the proto files need those to be generated
+* one can add extra jars like `-v $(pwd)/<lib>:/opt/gyremock/lib` if the proto files needed them
 
 2) Stub 
 ```json
-curl -X POST http://localhost:8888/__admin/mappings \
+curl -X POST http://localhost:18080/__admin/mappings \
   -d '{
     "request": {
         "method": "POST",

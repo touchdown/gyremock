@@ -13,5 +13,5 @@ COPY . /opt/gyremock/
 WORKDIR /opt/gyremock
 RUN sbt compile || return 0
 
-EXPOSE 8888 50000
+EXPOSE 18080 50000
 ENTRYPOINT ["sbt", "run"]

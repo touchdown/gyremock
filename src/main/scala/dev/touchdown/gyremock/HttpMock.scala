@@ -1,6 +1,5 @@
 package dev.touchdown.gyremock
 
-import java.io.IOException
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -18,41 +17,39 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.compat.java8.FutureConverters._
 import scala.util.Try
 
-object HttpMock {
+object HttpMock extends StrictLogging {
+  private val port = 18080
   private val config = wireMockConfig
     .notifier(new Slf4jNotifier(true))
     .maxRequestJournalEntries(1000)
     .usingFilesUnderDirectory("wiremock")
     .extensions(new ResponseTemplateTransformer(true))
-    .port(8888)
-  private val SERVER = new WireMockServer(config)
+    .port(port)
+
+  private lazy val SERVER = new WireMockServer(config)
 }
 
-class HttpMock(jsonPrinter: Printer, parser: Parser)(implicit ec: ExecutionContext) extends StrictLogging {
-  import dev.touchdown.gyremock.HttpMock.SERVER
+class HttpMock(wiremockHost: Option[String], jsPrinter: Printer, jsParser: Parser)(implicit ec: ExecutionContext) extends StrictLogging {
+  import HttpMock._
 
-  def init(): Unit = {
-    if (!SERVER.isRunning) SERVER.start()
-  }
+  private val targetBaseUrl = s"http://${wiremockHost.getOrElse(SERVER.baseUrl)}:$port"
 
-  def destroy(): Unit = {
-    if (SERVER.isRunning) SERVER.stop()
-  }
+  def init(): Unit = if (wiremockHost.isEmpty && !SERVER.isRunning) SERVER.start()
 
-  @throws[IOException]
-  @throws[InterruptedException]
+  def destroy(): Unit = if (wiremockHost.isEmpty && SERVER.isRunning) SERVER.stop()
+
   def send[I <: GeneratedMessage, O <: GeneratedMessage with Message[O] : GeneratedMessageCompanion](message: I, path: String): Future[O] = {
-    val json =  jsonPrinter.print(message)
+    val json = jsPrinter.print(message)
     logger.info("received raw message:\n{}\njson:\n{}", message.toProtoString, json)
     val request = HttpRequest.newBuilder
-      .uri(URI.create(SERVER.baseUrl + path))
+      .uri(URI.create(targetBaseUrl + path))
       .POST(HttpRequest.BodyPublishers.ofString(json))
       .build
     HttpClient
       .newHttpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString)
       .toScala
       .map{r =>
-        val resp = Try(parser.fromJsonString[O](r.body()))
+        val resp = Try(jsParser.fromJsonString[O](r.body()))
         resp.fold(
           ex => logger.error("failed to parse into protos", ex),
           m => logger.info("resp proto:\n{}", m.toProtoString)

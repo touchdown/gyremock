@@ -9,6 +9,7 @@ scalaVersion := "2.12.12"
 libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "1.2.3",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
+  "com.typesafe" % "config" % "1.4.1",
   "com.github.tomakehurst" % "wiremock-standalone" % "2.27.2",
   "io.grpc" % "protoc-gen-grpc-java" % Version.grpcJavaVersion asProtocPlugin(),
   "io.grpc" % "grpc-services" % Version.grpcJavaVersion,

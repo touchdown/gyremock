@@ -9,8 +9,6 @@ import scalapb.json4s.{Parser, Printer}
 import scala.concurrent.{ExecutionContext, Future}
 
 object GyreMockApp extends StrictLogging with App {
-  // Important: enable HTTP/2 in ActorSystem's config
-  // We do it here programmatically, but you can also set it in the application.conf
   val system = ActorSystem("GyreMockApp")
   val wiremockBaseUrl = Some(system.settings.config.getString("gyremock.wiremock.host")).filter(_.nonEmpty)
   val printer = new Printer().includingDefaultValueFields

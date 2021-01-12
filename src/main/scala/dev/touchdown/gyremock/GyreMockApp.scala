@@ -18,7 +18,6 @@ object GyreMockApp extends StrictLogging with App {
   val services = ServicesBuilder.build(httpMock)
   val server = new GrpcServer(services).start(50000)
 
-  httpMock.init()
   server.awaitTermination()
   server.shutdown().awaitTermination()
   httpMock.destroy()

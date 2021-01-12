@@ -32,9 +32,9 @@ object HttpMock extends StrictLogging {
 class HttpMock(wiremockHost: Option[String], jsPrinter: Printer, jsParser: Parser)(implicit ec: ExecutionContext) extends StrictLogging {
   import HttpMock._
 
-  private val targetBaseUrl = s"http://${wiremockHost.getOrElse(SERVER.baseUrl)}:$port"
+  if (wiremockHost.isEmpty && !SERVER.isRunning) SERVER.start()
 
-  def init(): Unit = if (wiremockHost.isEmpty && !SERVER.isRunning) SERVER.start()
+  private val targetBaseUrl = wiremockHost.map(h => s"http://${h}:$port").getOrElse(SERVER.baseUrl)
 
   def destroy(): Unit = if (wiremockHost.isEmpty && SERVER.isRunning) SERVER.stop()
 

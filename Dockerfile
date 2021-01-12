@@ -11,7 +11,7 @@ RUN touch /opt/gyremock/proto/init.proto
 # these will copy the source code over and get the image ready
 COPY . /opt/gyremock/
 WORKDIR /opt/gyremock
-RUN sbt compile || return 0
+RUN sbt compile
 
 EXPOSE 18080 50000
 ENTRYPOINT ["sbt", "run"]

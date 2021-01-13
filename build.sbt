@@ -19,10 +19,12 @@ libraryDependencies ++= Seq(
 
 fork in run := true
 
-scalacOptions ++= Seq("-Xfatal-warnings")
+scalacOptions ++= Seq("-deprecation")
 
 enablePlugins(AkkaGrpcPlugin)
 akkaGrpcGeneratedSources in Compile := Seq(AkkaGrpc.Server)
 akkaGrpcExtraGenerators in Compile := Seq(AkkaGrpcRedirectCodeGen, ServicesBuilderCodeGen)
 
 PB.protoSources in Compile := Seq(baseDirectory.value / "proto")
+
+resolvers += Resolver.bintrayRepo("akka", "snapshots")

@@ -16,10 +16,6 @@ class AkkaGrpcServer(services: immutable.Seq[(ServiceDescription, PartialFunctio
   private val serviceHandlers: HttpRequest => Future[HttpResponse] = ServiceHandler.concatOrNotFound(handlers:_*)
 
   def start(port: Int): Future[Http.ServerBinding] = {
-    Http().bindAndHandleAsync(
-      serviceHandlers,
-      interface = "0.0.0.0",
-      port = port,
-      connectionContext = HttpConnectionContext())
+    Http().newServerAt(interface = "0.0.0.0", port = port).bind(serviceHandlers)
   }
 }

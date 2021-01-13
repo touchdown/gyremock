@@ -50,12 +50,12 @@ final private class RedirectCodeGenerator(service: Service) {
 
   private def addMethodImpl(printer: FunctionalPrinter, method: Method): FunctionalPrinter = {
     printer
-      .add(s"def ${method.name}(in: ${method.parameterType}): ${method.returnType} = {")
+      .add(s"def ${method.nameSafe}(in: ${method.parameterType}): ${method.returnType} = {")
       .addIndented(method.methodType match {
         case akka.grpc.gen.Unary =>
           s"""httpMock.send[${method.parameterType}, ${method.outputTypeUnboxed}](in, "/${service.name}/${method.name}")"""
         case akka.grpc.gen.ServerStreaming =>
-          s"""Source.fromFuture(httpMock.send[${method.parameterType}, ${method.outputTypeUnboxed}](in, "/${service.name}/${method.name}"))"""
+          s"""Source.future(httpMock.send[${method.parameterType}, ${method.outputTypeUnboxed}](in, "/${service.name}/${method.name}"))"""
         case akka.grpc.gen.ClientStreaming =>
           s"""in.runWith(Sink.last).flatMap(e => httpMock.send[${method.inputTypeUnboxed}, ${method.outputTypeUnboxed}](e, "/${service.name}/${method.name}"))"""
         case akka.grpc.gen.BidiStreaming =>

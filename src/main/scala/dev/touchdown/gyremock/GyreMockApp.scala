@@ -10,15 +10,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object GyreMockApp extends StrictLogging with App {
   val system = ActorSystem("GyreMockApp")
-  val wiremockBaseUrl = Some(system.settings.config.getString("gyremock.wiremock.host")).filter(_.nonEmpty)
+  val settings = WiremockSettings(system.settings.config.getConfig("gyremock.wiremock"))
   val printer = new Printer().includingDefaultValueFields
   val parser = new Parser()
-  val httpMock = new HttpMock(wiremockBaseUrl, printer, parser)
+  val httpMock = new HttpMock(settings, printer, parser)
   new GyreMockApp(system, httpMock).run()
-  if (wiremockBaseUrl.isEmpty){
-    httpMock.init()
-    system.registerOnTermination(httpMock.destroy())
-  }
+  system.registerOnTermination(httpMock.destroy())
   // ActorSystem threads will keep the app alive until `system.terminate()` is called
 }
 

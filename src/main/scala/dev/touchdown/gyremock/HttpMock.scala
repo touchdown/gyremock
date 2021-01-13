@@ -17,26 +17,20 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.compat.java8.FutureConverters._
 import scala.util.Try
 
-object HttpMock extends StrictLogging {
-  private val port = 18080
+class HttpMock(settings: WiremockSettings, jsPrinter: Printer, jsParser: Parser)(implicit ec: ExecutionContext) extends StrictLogging {
   private val config = wireMockConfig
     .notifier(new Slf4jNotifier(true))
     .maxRequestJournalEntries(1000)
     .usingFilesUnderDirectory("wiremock")
     .extensions(new ResponseTemplateTransformer(true))
-    .port(port)
+    .port(settings.port)
 
   private lazy val SERVER = new WireMockServer(config)
-}
+  if (settings.host.isEmpty && !SERVER.isRunning) SERVER.start()
 
-class HttpMock(wiremockHost: Option[String], jsPrinter: Printer, jsParser: Parser)(implicit ec: ExecutionContext) extends StrictLogging {
-  import HttpMock._
+  private val targetBaseUrl = settings.host.map(h => s"http://${h}:${settings.port}").getOrElse(SERVER.baseUrl)
 
-  if (wiremockHost.isEmpty && !SERVER.isRunning) SERVER.start()
-
-  private val targetBaseUrl = wiremockHost.map(h => s"http://${h}:$port").getOrElse(SERVER.baseUrl)
-
-  def destroy(): Unit = if (wiremockHost.isEmpty && SERVER.isRunning) SERVER.stop()
+  def destroy(): Unit = if (settings.host.isEmpty && SERVER.isRunning) SERVER.stop()
 
   def send[I <: GeneratedMessage, O <: GeneratedMessage with Message[O] : GeneratedMessageCompanion](message: I, path: String): Future[O] = {
     val json = jsPrinter.print(message)

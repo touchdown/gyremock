@@ -9,11 +9,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object GyreMockApp extends StrictLogging with App {
 
   val config = ConfigFactory.load()
-  val wiremockHost = Some(config.getString("gyremock.wiremock.host")).filter(_.nonEmpty)
+  val settings = WiremockSettings(config.getConfig("gyremock.wiremock"))
 
   val printer = new Printer().includingDefaultValueFields
   val parser = new Parser()
-  val httpMock = new HttpMock(wiremockHost, printer, parser)
+  val httpMock = new HttpMock(settings, printer, parser)
 
   val services = ServicesBuilder.build(httpMock)
   val server = new GrpcServer(services).start(50000)

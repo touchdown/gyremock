@@ -10,29 +10,28 @@ import com.github.tomakehurst.wiremock.common.Slf4jNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
 import com.typesafe.scalalogging.StrictLogging
-import scalapb.{GeneratedMessage, GeneratedMessageCompanion, Message}
+import scalapb.{GeneratedMessage, GeneratedMessageCompanion}
 import scalapb.json4s.{Parser, Printer}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.compat.java8.FutureConverters._
 import scala.util.Try
 
-class HttpMock(settings: WiremockSettings, jsPrinter: Printer, jsParser: Parser)(implicit ec: ExecutionContext) extends StrictLogging {
-  private val config = wireMockConfig
+class HttpMock(settings: WiremockSettings, jsPrinter: Printer, jsParser: Parser) extends StrictLogging {
+  private lazy val SERVER = new WireMockServer(wireMockConfig
     .notifier(new Slf4jNotifier(true))
     .maxRequestJournalEntries(1000)
     .usingFilesUnderDirectory("wiremock")
     .extensions(new ResponseTemplateTransformer(true))
     .port(settings.port)
-
-  private lazy val SERVER = new WireMockServer(config)
+  )
   if (settings.host.isEmpty && !SERVER.isRunning) SERVER.start()
 
   private val targetBaseUrl = settings.host.map(h => s"http://${h}:${settings.port}").getOrElse(SERVER.baseUrl)
 
   def destroy(): Unit = if (settings.host.isEmpty && SERVER.isRunning) SERVER.stop()
 
-  def send[I <: GeneratedMessage, O <: GeneratedMessage with Message[O] : GeneratedMessageCompanion](message: I, path: String): Future[O] = {
+  def send[I <: GeneratedMessage, O <: GeneratedMessage : GeneratedMessageCompanion](message: I, path: String)(implicit ec: ExecutionContext): Future[O] = {
     val json = jsPrinter.print(message)
     logger.info("received raw message:\n{}\njson:\n{}", message.toProtoString, json)
     val request = HttpRequest.newBuilder

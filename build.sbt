@@ -2,17 +2,16 @@ import scalapb.compiler.Version
 
 name := "gyremock"
 
-version := "0.2.0"
+version := "0.2.1"
 
-scalaVersion := "2.12.11"
+scalaVersion := "2.13.5"
 
 libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "1.2.3",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
   "com.typesafe" % "config" % "1.4.1",
   "com.github.tomakehurst" % "wiremock-standalone" % "2.27.2",
-  "com.thesamet.scalapb" %% "scalapb-json4s" % "0.10.2",
-  "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.1",
+  "com.thesamet.scalapb" %% "scalapb-json4s" % "0.10.3",
   "org.scalatest" %% "scalatest" % "3.1.0" % Test
 )
 

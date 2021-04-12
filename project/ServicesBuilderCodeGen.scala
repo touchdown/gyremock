@@ -1,7 +1,7 @@
 
 import akka.grpc.gen.scaladsl.Service
 import akka.grpc.gen.{CodeGenerator, Logger}
-import com.google.protobuf.Descriptors.{FileDescriptor, ServiceDescriptor}
+import com.google.protobuf.Descriptors.FileDescriptor
 import com.google.protobuf.compiler.PluginProtos.{CodeGeneratorRequest, CodeGeneratorResponse}
 import protocbridge.Artifact
 import scalapb.compiler._
@@ -14,9 +14,9 @@ object ServicesBuilderCodeGen extends CodeGenerator {
 
   override def run(request: CodeGeneratorRequest, logger: Logger): CodeGeneratorResponse = {
     val b = CodeGeneratorResponse.File.newBuilder()
-    val services = getServices(request)
+    val services = getServices(request, logger)
     b.setContent(new ObjectCodeGenerator(services).run())
-    b.setName("io/touchdown/gyremock/ServicesBuilder.scala")
+    b.setName("dev/touchdown/gyremock/ServicesBuilder.scala")
     logger.info("Generating services builder")
     CodeGeneratorResponse.newBuilder().addFile(b).build()
   }
@@ -25,14 +25,7 @@ object ServicesBuilderCodeGen extends CodeGenerator {
 
   // code is copied and pasted from https://github.com/akka/akka-grpc/blob/master/codegen/src/main/scala/akka/grpc/gen/scaladsl/ScalaCodeGenerator.scala
   // will remove once its been fixed to be a protected method upstream
-  private def getServices(request: CodeGeneratorRequest) = {
-    val fileDescByName: Map[String, FileDescriptor] =
-      request.getProtoFileList.asScala.foldLeft[Map[String, FileDescriptor]](Map.empty) {
-        case (acc, fp) =>
-          val deps = fp.getDependencyList.asScala.map(acc).toArray
-          acc + (fp.getName -> FileDescriptor.buildFrom(fp, deps))
-      }
-
+  private def getServices(request: CodeGeneratorRequest, logger: Logger) = {
     // Currently per-invocation options, intended to become per-service options eventually
     // https://github.com/akka/akka-grpc/issues/451
     val params = request.getParameter.toLowerCase
@@ -40,16 +33,18 @@ object ServicesBuilderCodeGen extends CodeGenerator {
     val serverPowerApi = params.contains("server_power_apis") && !params.contains("server_power_apis=false")
     val usePlayActions = params.contains("use_play_actions") && !params.contains("use_play_actions=false")
 
+    val codeGenRequest = protocgen.CodeGenRequest(request)
     (for {
-      file <- request.getFileToGenerateList.asScala
-      fileDesc = fileDescByName(file)
+      fileDesc <-     codeGenRequest.filesToGenerate
       serviceDesc <- fileDesc.getServices.asScala
     } yield Service(
+      codeGenRequest,
       parseParameters(request.getParameter),
       fileDesc,
       serviceDesc,
       serverPowerApi,
-      usePlayActions)).toList
+      usePlayActions)
+    ).toList
   }
 
   // flags listed in akkaGrpcCodeGeneratorSettings's description

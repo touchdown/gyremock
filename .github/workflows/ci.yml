@@ -9,22 +9,23 @@ name: Continuous Integration
 
 on:
   pull_request:
-    branches: [master]
+    branches: [main]
   push:
-    branches: [master]
+    branches: [main]
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  ci:
-    name: ci
+  build:
+    name: Build and Test
     strategy:
       matrix:
         os: [ubuntu-20.04]
         scala: [2.13.8]
-        java: [temurin@1.11]
+        java: [adopt-openj9@1.11]
     runs-on: ${{ matrix.os }}
     env:
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       GITHUB_EVENT_BEFORE: ${{ github.event.before }}
       GITHUB_EVENT_AFTER: ${{ github.event.after }}
     steps:
@@ -32,12 +33,42 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          submodules: true
 
       - name: Setup Scala
         uses: olafurpg/setup-scala@v13
         with:
           java-version: ${{ matrix.java }}
 
-      - name: build images
-        run: sbt ++${{ matrix.scala }} scalafmtCheckAll test
+      - name: Symlink protobuf
+        run: ln -s example/proto proto
+
+      - name: Build images
+        run: sbt ++${{ matrix.scala }} githubWorkflowCheck scalafmtCheckAll test
+
+  publish:
+    name: Docker Publish
+    needs: [build]
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main')
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+        scala: [2.13.8]
+        java: [adopt-openj9@1.11]
+    runs-on: ${{ matrix.os }}
+    env:
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+    steps:
+      - name: Clone and checkout to current branch
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Install buildx
+        id: buildx
+        uses: crazy-max/ghaction-docker-buildx@v1
+        with:
+          version: latest
+
+      - name: Docker publish
+        run: 'docker buildx build -t touchdown/gyremock:0.3.1 --platform linux/amd64,linux/arm64 --push .'

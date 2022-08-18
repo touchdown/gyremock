@@ -22,8 +22,7 @@ enablePlugins(AkkaGrpcPlugin)
 Compile / akkaGrpcGeneratedSources := Seq(AkkaGrpc.Server)
 Compile / akkaGrpcExtraGenerators := Seq(AkkaGrpcRedirectCodeGen, ServicesBuilderCodeGen)
 
-Compile / PB.protoSources := Seq(baseDirectory.value / "proto")
+Compile / PB.protoSources += baseDirectory.value / "proto"
 
-githubWorkflowTargetBranches := Seq("master")
-githubWorkflowGeneratedCI := Workflow(scalaVersion.value)
-githubWorkflowEnv := Map.empty[String, String]
+githubWorkflowTargetBranches := Seq("main")
+githubWorkflowGeneratedCI := Workflow(scalaVersion.value, version.value)

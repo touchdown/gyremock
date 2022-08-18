@@ -1,24 +1,24 @@
-
-import akka.grpc.gen.scaladsl.{Method, ScalaCodeGenerator, Service}
-
-import akka.grpc.gen.Logger
-import scalapb.compiler._
-import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse
-
 import scala.collection.immutable
 
+import akka.grpc.gen.Logger
+import akka.grpc.gen.scaladsl.{Method, ScalaCodeGenerator, Service}
+import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse
+import scalapb.compiler._
+
+/** this generates the code for the redirect from grpc to wiremock http json */
 object AkkaGrpcRedirectCodeGen extends ScalaCodeGenerator {
   override val name: String = "akka-grpc-redirect"
 
   override def perServiceContent = super.perServiceContent + generateRedirectImpl
 
-  private val generateRedirectImpl: (Logger, Service) => immutable.Seq[CodeGeneratorResponse.File] = (logger, service) => {
-    val b = CodeGeneratorResponse.File.newBuilder()
-    b.setContent(new RedirectCodeGenerator(service).run())
-    b.setName(s"${service.packageDir}/${service.name}Redirect.scala")
-    logger.info(s"Generating Akka gRPC redirect service impl for ${service.packageName}.${service.name}")
-    immutable.Seq(b.build)
-  }
+  private val generateRedirectImpl: (Logger, Service) => immutable.Seq[CodeGeneratorResponse.File] =
+    (logger, service) => {
+      val b = CodeGeneratorResponse.File.newBuilder()
+      b.setContent(new RedirectCodeGenerator(service).run())
+      b.setName(s"${service.packageDir}/${service.name}Redirect.scala")
+      logger.info(s"Generating Akka gRPC redirect service impl for ${service.packageName}.${service.name}")
+      immutable.Seq(b.build)
+    }
 }
 
 final private class RedirectCodeGenerator(service: Service) {
@@ -65,4 +65,3 @@ final private class RedirectCodeGenerator(service: Service) {
       .newline
   }
 }
-

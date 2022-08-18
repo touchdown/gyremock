@@ -1,14 +1,14 @@
+import scala.collection.immutable
+import scala.jdk.CollectionConverters._
 
-import akka.grpc.gen.scaladsl.Service
 import akka.grpc.gen.{CodeGenerator, Logger}
-import com.google.protobuf.Descriptors.FileDescriptor
+import akka.grpc.gen.scaladsl.Service
 import com.google.protobuf.compiler.PluginProtos.{CodeGeneratorRequest, CodeGeneratorResponse}
 import protocbridge.Artifact
 import scalapb.compiler._
 
-import scala.collection.immutable
-import scala.jdk.CollectionConverters._
-
+/** this generates the code to bootstrap the redirect grpc service
+  */
 object ServicesBuilderCodeGen extends CodeGenerator {
   override val name: String = "services-builder"
 
@@ -35,7 +35,7 @@ object ServicesBuilderCodeGen extends CodeGenerator {
 
     val codeGenRequest = protocgen.CodeGenRequest(request)
     (for {
-      fileDesc <-     codeGenRequest.filesToGenerate
+      fileDesc <- codeGenRequest.filesToGenerate
       serviceDesc <- fileDesc.getServices.asScala
     } yield Service(
       codeGenRequest,
@@ -43,8 +43,8 @@ object ServicesBuilderCodeGen extends CodeGenerator {
       fileDesc,
       serviceDesc,
       serverPowerApi,
-      usePlayActions)
-    ).toList
+      usePlayActions
+    )).toList
   }
 
   // flags listed in akkaGrpcCodeGeneratorSettings's description
@@ -77,7 +77,6 @@ final private class ObjectCodeGenerator(services: immutable.Seq[Service]) {
       .result
   }
 
-
   private def addPackageClause(printer: FunctionalPrinter): FunctionalPrinter = {
     printer.add("package dev.touchdown.gyremock")
   }
@@ -95,12 +94,18 @@ final private class ObjectCodeGenerator(services: immutable.Seq[Service]) {
   }
 
   private def addObject(printer: FunctionalPrinter): FunctionalPrinter = {
-    printer.add("object ServicesBuilder {")
+    printer
+      .add("object ServicesBuilder {")
       .newline
-      .addIndented("def build(httpMock: HttpMock)(implicit sys: ActorSystem): immutable.Seq[(ServiceDescription, PartialFunction[HttpRequest, Future[HttpResponse]])] = List(")
+      .addIndented(
+        "def build(httpMock: HttpMock)(implicit sys: ActorSystem): immutable.Seq[(ServiceDescription, PartialFunction[HttpRequest, Future[HttpResponse]])] = List("
+      )
       .indent
-      .print(services) { (p, s) =>
-        p.addIndented(s"(${s.packageName}.${s.name}, ${s.packageName}.${s.name}Handler.partial(new ${s.packageName}.${s.name}Redirect(httpMock))),")
+      .print(services) {
+        (p, s) =>
+          p.addIndented(
+            s"(${s.packageName}.${s.name}, ${s.packageName}.${s.name}Handler.partial(new ${s.packageName}.${s.name}Redirect(httpMock))),"
+          )
       }
       .add(")")
       .outdent

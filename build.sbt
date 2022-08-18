@@ -17,8 +17,13 @@ run / fork := true
 
 scalacOptions ++= Seq("-deprecation")
 
+// these run codegen first before compiling
 enablePlugins(AkkaGrpcPlugin)
 Compile / akkaGrpcGeneratedSources := Seq(AkkaGrpc.Server)
 Compile / akkaGrpcExtraGenerators := Seq(AkkaGrpcRedirectCodeGen, ServicesBuilderCodeGen)
 
 Compile / PB.protoSources := Seq(baseDirectory.value / "proto")
+
+githubWorkflowTargetBranches := Seq("master")
+githubWorkflowGeneratedCI := Workflow(scalaVersion.value)
+githubWorkflowEnv := Map.empty[String, String]

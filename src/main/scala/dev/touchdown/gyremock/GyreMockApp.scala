@@ -1,12 +1,11 @@
 package dev.touchdown.gyremock
 
+import scala.concurrent.{ExecutionContext, Future}
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.stream.{ActorMaterializer, Materializer}
 import com.typesafe.scalalogging.StrictLogging
 import scalapb.json4s.{Parser, Printer}
-
-import scala.concurrent.{ExecutionContext, Future}
 
 object GyreMockApp extends StrictLogging with App {
   val system = ActorSystem("GyreMockApp")

@@ -2,8 +2,8 @@ package dev.touchdown.gyremock
 
 import com.typesafe.config.Config
 
-object WiremockSettings{
-  private val DefaultPort =  18080
+object WiremockSettings {
+  private val DefaultPort = 18080
 
   def apply(config: Config): WiremockSettings = WiremockSettings(
     host = Some(config.getString("host")).filter(_.nonEmpty),

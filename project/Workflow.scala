@@ -34,8 +34,7 @@ object Workflow {
       oses = List("ubuntu-20.04"),
       scalas = List(scalaVersion),
       javas = List(JavaSpec(JavaSpec.Distribution.OpenJ9, "1.11")),
-      env = Map("DOCKER_TOKEN" -> "${{ secrets.DOCKER_TOKEN }}", "DOCKER_USERNAME" -> "${{ secrets.DOCKER_USERNAME }}"),
-      steps = List(cloneAndCheckoutToCurrentBranch, setupBuildx, dockerPublish(projVersion)),
+      steps = List(cloneAndCheckoutToCurrentBranch, setupBuildx, dockerLogin, dockerPublish(projVersion)),
       cond = Some("github.event_name != 'pull_request' && (github.ref == 'refs/heads/main')"),
       needs = List("build")
     )
@@ -103,6 +102,14 @@ object WorkflowSteps {
 
   val inflate: WorkflowStep.Run =
     WorkflowStep.Run(name = Some("Inflate target directories"), commands = List("tar xf targets.tar", "rm targets.tar"))
+
+  val dockerLogin: WorkflowStep.Run =
+    WorkflowStep.Run(
+      name = Some("Login to docker hub"),
+      commands = List(
+        "echo \"${{ secrets.DOCKER_TOKEN }}\" | docker login --username \"${{ secrets.DOCKER_USERNAME }}\" --password-stdin"
+      )
+    )
 
   def dockerPublish(projVersion: String): WorkflowStep.Run = WorkflowStep.Run(
     name = Some("Docker publish"),

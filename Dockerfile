@@ -1,4 +1,4 @@
-FROM hseeberger/scala-sbt:eclipse-temurin-11.0.14.1_1.6.2_2.13.8
+FROM sbtscala/scala-sbt:eclipse-temurin-11.0.17_8_1.8.2_2.13.10
 
 # these directories are meant to be mounted by the docker run command
 RUN mkdir -p /opt/gyremock/wiremock

@@ -22,6 +22,8 @@ enablePlugins(AkkaGrpcPlugin)
 Compile / akkaGrpcGeneratedSources := Seq(AkkaGrpc.Server)
 Compile / akkaGrpcExtraGenerators := Seq(AkkaGrpcRedirectCodeGen, ServicesBuilderCodeGen)
 
+Compile / PB.protocOptions += "--experimental_allow_proto3_optional"
+
 Compile / PB.protoSources += baseDirectory.value / "proto"
 
 githubWorkflowTargetBranches := Seq("main")

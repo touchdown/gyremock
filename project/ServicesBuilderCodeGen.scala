@@ -18,7 +18,11 @@ object ServicesBuilderCodeGen extends CodeGenerator {
     b.setContent(new ObjectCodeGenerator(services).run())
     b.setName("dev/touchdown/gyremock/ServicesBuilder.scala")
     logger.info("Generating services builder")
-    CodeGeneratorResponse.newBuilder().addFile(b).build()
+    CodeGeneratorResponse
+      .newBuilder()
+      .setSupportedFeatures(CodeGeneratorResponse.Feature.FEATURE_PROTO3_OPTIONAL.getNumber)
+      .addFile(b)
+      .build()
   }
 
   override def suggestedDependencies: CodeGenerator.ScalaBinaryVersion => scala.Seq[Artifact] = _ => Nil

@@ -1,6 +1,6 @@
 name := "gyremock"
 
-version := "0.4.1"
+version := "0.4.2"
 
 scalaVersion := "2.13.10"
 
@@ -21,8 +21,6 @@ scalacOptions ++= Seq("-deprecation")
 enablePlugins(AkkaGrpcPlugin)
 Compile / akkaGrpcGeneratedSources := Seq(AkkaGrpc.Server)
 Compile / akkaGrpcExtraGenerators := Seq(AkkaGrpcRedirectCodeGen, ServicesBuilderCodeGen)
-
-Compile / PB.protocOptions += "--experimental_allow_proto3_optional"
 
 Compile / PB.protoSources += baseDirectory.value / "proto"
 

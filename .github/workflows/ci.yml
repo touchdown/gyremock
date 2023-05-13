@@ -23,7 +23,7 @@ jobs:
       matrix:
         os: [ubuntu-20.04]
         scala: [2.13.10]
-        java: [adopt-openj9@1.11]
+        java: [temurin@11]
     runs-on: ${{ matrix.os }}
     env:
       GITHUB_EVENT_BEFORE: ${{ github.event.before }}
@@ -34,10 +34,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Scala
-        uses: olafurpg/setup-scala@v13
+      - name: split Java
+        id: java_split
+        uses: jungwinter/split@v2
         with:
-          java-version: ${{ matrix.java }}
+          msg: ${{ matrix.java }}
+          separator: '@'
+          maxsplit: 2
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ steps.java_split.outputs._1 }}
+          distribution: ${{ steps.java_split.outputs._0 }}
+          cache: sbt
 
       - name: Symlink protobuf
         run: ln -s example/proto proto
@@ -53,7 +63,7 @@ jobs:
       matrix:
         os: [ubuntu-20.04]
         scala: [2.13.10]
-        java: [adopt-openj9@1.11]
+        java: [temurin@11]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Clone and checkout to current branch

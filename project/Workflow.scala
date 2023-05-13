@@ -33,7 +33,7 @@ object Workflow {
       name = "Docker Publish",
       oses = List("ubuntu-20.04"),
       scalas = List(scalaVersion),
-      javas = List(JavaSpec(JavaSpec.Distribution.Temurin, "1.11")),
+      javas = List(JavaSpec(JavaSpec.Distribution.Temurin, "11")),
       steps = List(cloneAndCheckoutToCurrentBranch, setupBuildx, dockerLogin, dockerPublish(projVersion)),
       cond = Some("github.event_name != 'pull_request' && (github.ref == 'refs/heads/main')"),
       needs = List("build")

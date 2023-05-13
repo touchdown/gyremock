@@ -45,8 +45,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          java-version: ${{ steps.java_split.outputs._2 }}
-          distribution: ${{ steps.java_split.outputs._1 }}
+          java-version: ${{ steps.java_split.outputs._1 }}
+          distribution: ${{ steps.java_split.outputs._0 }}
           cache: sbt
 
       - name: Symlink protobuf
@@ -63,7 +63,7 @@ jobs:
       matrix:
         os: [ubuntu-20.04]
         scala: [2.13.10]
-        java: [temurin@1.11]
+        java: [temurin@11]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Clone and checkout to current branch

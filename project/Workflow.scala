@@ -71,8 +71,8 @@ object WorkflowSteps {
       name = Some("Setup Java"),
       ref = UseRef.Public(owner = "actions", repo = "setup-java", ref = "v3"),
       params = Map(
-        "java-version" -> "${{ steps.java_split.outputs._2 }}",
-        "distribution" -> "${{ steps.java_split.outputs._1 }}",
+        "java-version" -> "${{ steps.java_split.outputs._1 }}",
+        "distribution" -> "${{ steps.java_split.outputs._0 }}",
         "cache" -> "sbt"
       )
     )

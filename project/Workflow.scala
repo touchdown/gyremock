@@ -16,10 +16,10 @@ object Workflow {
       name = "Build and Test",
       oses = List("ubuntu-20.04"),
       scalas = List(scalaVersion),
-      javas = List(JavaSpec(JavaSpec.Distribution.OpenJ9, "1.11")),
+      javas = List(JavaSpec(JavaSpec.Distribution.Temurin, "11")),
       env =
         Map("GITHUB_EVENT_BEFORE" -> "${{ github.event.before }}", "GITHUB_EVENT_AFTER" -> "${{ github.event.after }}"),
-      steps = List(cloneAndCheckoutToCurrentBranch, setupScala, symlink, test),
+      steps = List(cloneAndCheckoutToCurrentBranch, splitJava, setupJava, symlink, test),
       cond = None
     )
   }
@@ -33,7 +33,7 @@ object Workflow {
       name = "Docker Publish",
       oses = List("ubuntu-20.04"),
       scalas = List(scalaVersion),
-      javas = List(JavaSpec(JavaSpec.Distribution.OpenJ9, "1.11")),
+      javas = List(JavaSpec(JavaSpec.Distribution.Temurin, "1.11")),
       steps = List(cloneAndCheckoutToCurrentBranch, setupBuildx, dockerLogin, dockerPublish(projVersion)),
       cond = Some("github.event_name != 'pull_request' && (github.ref == 'refs/heads/main')"),
       needs = List("build")
@@ -59,11 +59,22 @@ object WorkflowSteps {
       params = Map("fetch-depth" -> "0")
     )
 
-  val setupScala: WorkflowStep.Use =
+  val splitJava: WorkflowStep.Use = WorkflowStep.Use(
+    id = Some("java_split"),
+    name = Some("split Java"),
+    ref = UseRef.Public(owner = "jungwinter", repo = "split", ref = "v2"),
+    params = Map("msg" -> "${{ matrix.java }}", "separator" -> "@", "maxsplit" -> "2")
+  )
+
+  val setupJava: WorkflowStep.Use =
     WorkflowStep.Use(
-      name = Some("Setup Scala"),
-      ref = UseRef.Public(owner = "olafurpg", repo = "setup-scala", ref = "v13"),
-      params = Map("java-version" -> "${{ matrix.java }}")
+      name = Some("Setup Java"),
+      ref = UseRef.Public(owner = "actions", repo = "setup-java", ref = "v3"),
+      params = Map(
+        "java-version" -> "${{ steps.java_split.outputs._2 }}",
+        "distribution" -> "${{ steps.java_split.outputs._1 }}",
+        "cache" -> "sbt"
+      )
     )
 
   val symlink: WorkflowStep.Run =

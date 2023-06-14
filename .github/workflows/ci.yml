@@ -81,4 +81,4 @@ jobs:
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Docker publish
-        run: 'docker buildx build -t touchdown/gyremock:0.4.2 --platform linux/amd64,linux/arm64 --push .'
+        run: 'docker buildx build -t touchdown/gyremock:0.4.3 --platform linux/amd64,linux/arm64 --push .'

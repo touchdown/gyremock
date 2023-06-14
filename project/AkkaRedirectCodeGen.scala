@@ -55,7 +55,7 @@ final private class RedirectCodeGenerator(service: Service) {
         case akka.grpc.gen.Unary =>
           s"""httpMock.send[${method.parameterType}, ${method.outputTypeUnboxed}](in, "/${service.name}/${method.name}")"""
         case akka.grpc.gen.ServerStreaming =>
-          s"""Source.future(httpMock.send[${method.parameterType}, ${method.outputTypeUnboxed}](in, "/${service.name}/${method.name}"))"""
+          s"""Source.future(httpMock.sendStream[${method.parameterType}, ${method.outputTypeUnboxed}](in, "/${service.name}/${method.name}")).mapConcat(identity)"""
         case akka.grpc.gen.ClientStreaming =>
           s"""in.runWith(Sink.last).flatMap(e => httpMock.send[${method.inputTypeUnboxed}, ${method.outputTypeUnboxed}](e, "/${service.name}/${method.name}"))"""
         case akka.grpc.gen.BidiStreaming =>

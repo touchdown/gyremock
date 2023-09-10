@@ -11,7 +11,8 @@ service WalletService {
 }
 
 service BalanceService {
-  rpc getUserBalance (UserBalanceRequest) returns (UserBalanceResponse) {}
+  rpc getUserBalance (stream UserBalanceRequest) returns (UserBalanceResponse) {}
+  rpc streamUserBalances (stream UserBalanceRequest) returns (stream UserBalanceResponse) {}
 }
 
 message UserBalanceRequest {

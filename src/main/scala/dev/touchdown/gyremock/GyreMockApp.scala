@@ -7,12 +7,13 @@ import akka.http.scaladsl.Http
 import com.typesafe.scalalogging.StrictLogging
 import scalapb.json4s.{Parser, Printer}
 
-object GyreMockApp extends StrictLogging with App {
-  val system = ActorSystem("GyreMockApp")
-  val settings = WiremockSettings(system.settings.config.getConfig("gyremock.wiremock"))
-  val printer = new Printer().includingDefaultValueFields
-  val parser = new Parser()
-  val httpMock = new HttpMock(settings, printer, parser)
+object GyreMockApp extends App {
+  private val system = ActorSystem("GyreMockApp")
+  private val settings =
+    WiremockSettings(system.settings.config.getConfig("gyremock.wiremock"))
+  private val printer = new Printer().includingDefaultValueFields
+  private val parser = new Parser()
+  private val httpMock = new HttpMockImpl(settings, printer, parser)
   new GyreMockApp(system, httpMock).run()
   system.registerOnTermination(httpMock.destroy())
   // ActorSystem threads will keep the app alive until `system.terminate()` is called

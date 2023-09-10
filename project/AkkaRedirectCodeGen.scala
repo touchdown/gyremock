@@ -53,13 +53,13 @@ final private class RedirectCodeGenerator(service: Service) {
       .add(s"def ${method.nameSafe}(in: ${method.parameterType}): ${method.returnType} = {")
       .addIndented(method.methodType match {
         case akka.grpc.gen.Unary =>
-          s"""httpMock.send[${method.parameterType}, ${method.outputTypeUnboxed}](in, "/${service.name}/${method.name}")"""
+          s"""httpMock.unary[${method.parameterType}, ${method.outputTypeUnboxed}](in, "/${service.name}/${method.name}")"""
         case akka.grpc.gen.ServerStreaming =>
-          s"""Source.future(httpMock.sendStream[${method.parameterType}, ${method.outputTypeUnboxed}](in, "/${service.name}/${method.name}")).mapConcat(identity)"""
+          s"""Source.future(httpMock.sStream[${method.parameterType}, ${method.outputTypeUnboxed}](in, "/${service.name}/${method.name}")).mapConcat(identity)"""
         case akka.grpc.gen.ClientStreaming =>
-          s"""in.runWith(Sink.last).flatMap(e => httpMock.send[${method.inputTypeUnboxed}, ${method.outputTypeUnboxed}](e, "/${service.name}/${method.name}"))"""
+          s"""in.runWith(Sink.seq).flatMap(e => httpMock.cStream[${method.inputTypeUnboxed}, ${method.outputTypeUnboxed}](e, "/${service.name}/${method.name}"))"""
         case akka.grpc.gen.BidiStreaming =>
-          s"""in.mapAsync(1)(e => httpMock.send[${method.inputTypeUnboxed}, ${method.outputTypeUnboxed}](e, "/${service.name}/${method.name}"))"""
+          s"""in.fold(Seq.empty[api.wallet.wallet.UserBalanceRequest])(_ :+ _).mapAsync(1)(e => httpMock.bdStream[${method.inputTypeUnboxed}, ${method.outputTypeUnboxed}](e, "/${service.name}/${method.name}")).mapConcat(identity)"""
       })
       .add("}")
       .newline

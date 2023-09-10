@@ -59,7 +59,7 @@ final private class RedirectCodeGenerator(service: Service) {
         case akka.grpc.gen.ClientStreaming =>
           s"""in.runWith(Sink.seq).flatMap(e => httpMock.cStream[${method.inputTypeUnboxed}, ${method.outputTypeUnboxed}](e, "/${service.name}/${method.name}"))"""
         case akka.grpc.gen.BidiStreaming =>
-          s"""in.fold(Seq.empty[api.wallet.wallet.UserBalanceRequest])(_ :+ _).mapAsync(1)(e => httpMock.bdStream[${method.inputTypeUnboxed}, ${method.outputTypeUnboxed}](e, "/${service.name}/${method.name}")).mapConcat(identity)"""
+          s"""in.mapAsync(1)(e => httpMock.unary[${method.inputTypeUnboxed}, ${method.outputTypeUnboxed}](e, "/${service.name}/${method.name}"))"""
       })
       .add("}")
       .newline

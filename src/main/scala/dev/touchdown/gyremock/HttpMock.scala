@@ -26,15 +26,11 @@ trait HttpMock {
 
   def sStream[I <: GeneratedMessage, O <: GeneratedMessage: GeneratedMessageCompanion](message: I, path: String)(
     implicit ec: ExecutionContext
-  ): Future[List[O]]
+  ): Future[Seq[O]]
 
   def cStream[I <: GeneratedMessage, O <: GeneratedMessage: GeneratedMessageCompanion](message: Seq[I], path: String)(
     implicit ec: ExecutionContext
   ): Future[O]
-
-  def bdStream[I <: GeneratedMessage, O <: GeneratedMessage: GeneratedMessageCompanion](message: Seq[I], path: String)(
-    implicit ec: ExecutionContext
-  ): Future[List[O]]
 }
 
 class HttpMockImpl(settings: WiremockSettings, jsPrinter: Printer, jsParser: Parser)
@@ -65,12 +61,6 @@ class HttpMockImpl(settings: WiremockSettings, jsPrinter: Printer, jsParser: Par
       .toScala
   }
 
-  private def parseMsgs[I <: GeneratedMessage](messages: Seq[I]) = {
-    val json = messages.map(jsPrinter.print).mkString("[", ",", "]")
-    logger.info("received raw message:\n{}\njson:\n{}", messages.map(_.toProtoString), json)
-    json
-  }
-
   private def parseJson[O <: GeneratedMessage: GeneratedMessageCompanion](json: JValue) = {
     val r = Try(jsParser.fromJson[O](json))
     r.foreach(m => logger.info("resp proto:\n{}", m.toProtoString))
@@ -91,31 +81,23 @@ class HttpMockImpl(settings: WiremockSettings, jsPrinter: Printer, jsParser: Par
   override def unary[I <: GeneratedMessage, O <: GeneratedMessage: GeneratedMessageCompanion](message: I, path: String)(
     implicit ec: ExecutionContext
   ): Future[O] = {
-    val json = jsPrinter.print(message)
-    logger.info("received raw message:\n{}\njson:\n{}", message.toProtoString, json)
-    redirect(json, path).map(parseResp(_).head)
+    logger.debug("received raw message:\n{}\n", message.toProtoString)
+    redirect(jsPrinter.print(message), path).map(parseResp(_).head)
   }
 
   override def sStream[I <: GeneratedMessage, O <: GeneratedMessage: GeneratedMessageCompanion](
     message: I,
     path: String
-  )(implicit ec: ExecutionContext): Future[List[O]] = {
-    val json = jsPrinter.print(message)
-    logger.info("received raw message:\n{}\njson:\n{}", message.toProtoString, json)
-    redirect(json, path).map(parseResp[O](_))
+  )(implicit ec: ExecutionContext): Future[Seq[O]] = {
+    logger.debug("received raw message:\n{}\n", message.toProtoString)
+    redirect(jsPrinter.print(message), path).map(parseResp[O](_))
   }
 
   override def cStream[I <: GeneratedMessage, O <: GeneratedMessage: GeneratedMessageCompanion](
     messages: Seq[I],
     path: String
   )(implicit ec: ExecutionContext): Future[O] = {
-    redirect(parseMsgs(messages), path).map(parseResp(_).head)
-  }
-
-  override def bdStream[I <: GeneratedMessage, O <: GeneratedMessage: GeneratedMessageCompanion](
-    messages: Seq[I],
-    path: String
-  )(implicit ec: ExecutionContext): Future[List[O]] = {
-    redirect(parseMsgs(messages), path).map(parseResp[O](_))
+    logger.debug("received raw message:\n{}\n", messages.map(_.toProtoString).mkString("[", ",", "]"))
+    redirect(messages.map(jsPrinter.print).mkString("[", ",", "]"), path).map(parseResp(_).head)
   }
 }

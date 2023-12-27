@@ -1,10 +1,13 @@
-package gyremock.sbt
+package gyremock.gen.scaladsl
 
 import scala.collection.immutable
 
-import akka.grpc.gen.Logger
+import akka.grpc.gen.{CodeGenerator, Logger}
+import akka.grpc.gen.CodeGenerator.ScalaBinaryVersion
 import akka.grpc.gen.scaladsl.{Method, ScalaCodeGenerator, Service}
 import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse
+import gyremock.gen.BuildInfo
+import protocbridge.Artifact
 import scalapb.compiler._
 
 /** this generates the code for the translation from grpc to wiremock http json */
@@ -22,6 +25,16 @@ object TranslatorCodeGen extends ScalaCodeGenerator {
       logger.info(s"Generating Akka gRPC translation service impl for ${service.packageName}.${service.name}")
       immutable.Seq(b.build)
     }
+
+  override def suggestedDependencies: ScalaBinaryVersion => Seq[Artifact] =
+    (scalaBinaryVersion: CodeGenerator.ScalaBinaryVersion) =>
+      super.suggestedDependencies(scalaBinaryVersion) ++ Seq(
+        Artifact(
+          BuildInfo.organization,
+          BuildInfo.runtimeArtifactName + "_" + scalaBinaryVersion.prefix,
+          BuildInfo.version
+        )
+      )
 }
 
 final private class TranslateCodeGenerator(service: Service) {

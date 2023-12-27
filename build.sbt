@@ -1,18 +1,24 @@
 import sbt.Keys.scalaVersion
 import sbt.addSbtPlugin
 
-// gradle plugin compatibility (avoid `+` in snapshot versions)
 ThisBuild / dynverSeparator := "-"
 // append -SNAPSHOT to version when isSnapshot
 ThisBuild / dynverSonatypeSnapshots := true
 
 ThisBuild / organization := "io.github.touchdown"
 
+val gyremockRuntimeName = "gyremock-runtime"
+val akkaGrpcVersion = "2.1.6"
+
 lazy val codegen = Project(id = "gyremock-codegen", base = file("codegen"))
   .settings(resolvers += Resolver.sbtPluginRepo("releases"))
+  .enablePlugins(BuildInfoPlugin)
   .settings(
     scalaVersion := Dependencies.Versions.CrossScalaForPlugin.head,
-    addSbtPlugin("com.lightbend.akka.grpc" % "sbt-akka-grpc" % "2.1.6")
+    addSbtPlugin("com.lightbend.akka.grpc" % "sbt-akka-grpc" % akkaGrpcVersion),
+    buildInfoKeys ++= Seq[BuildInfoKey](organization, name, version, scalaVersion, sbtVersion),
+    buildInfoKeys += "runtimeArtifactName" -> gyremockRuntimeName,
+    buildInfoPackage := "gyremock.gen"
   )
 
 lazy val sbtPlugin = Project(id = "sbt-gyremock", base = file("sbt-plugin"))
@@ -23,13 +29,13 @@ lazy val sbtPlugin = Project(id = "sbt-gyremock", base = file("sbt-plugin"))
   )
   .dependsOn(codegen)
 
-lazy val runtime = Project(id = "gyremock-runtime", base = file("runtime"))
+lazy val runtime = Project(id = gyremockRuntimeName, base = file("runtime"))
   .settings(
     crossScalaVersions := Dependencies.Versions.CrossScalaForLib,
     scalaVersion := Dependencies.Versions.CrossScalaForLib.head,
     libraryDependencies := Seq(
       "ch.qos.logback" % "logback-classic" % "1.4.14" % Runtime,
-      "com.lightbend.akka.grpc" %% "akka-grpc-runtime" % "2.1.6",
+      "com.lightbend.akka.grpc" %% "akka-grpc-runtime" % akkaGrpcVersion,
       "com.typesafe.akka" %% "akka-actor" % "2.6.20",
       "com.typesafe.akka" %% "akka-http-core" % "10.2.9",
       "com.thesamet.scalapb" %% "scalapb-json4s" % "0.11.1",

@@ -1,3 +1,5 @@
+package gyremock.gen.scaladsl
+
 import scala.collection.immutable
 import scala.jdk.CollectionConverters._
 

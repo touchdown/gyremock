@@ -17,6 +17,8 @@ ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
 ThisBuild / scalacOptions ++= Seq("-Ywarn-unused")
 
+ThisBuild / githubWorkflowJavaVersions += JavaSpec.temurin("17")
+
 val gyremockRuntimeName = "gyremock-runtime"
 val akkaGrpcVersion = "2.1.6"
 

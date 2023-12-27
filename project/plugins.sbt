@@ -1,3 +1,5 @@
+addSbtPlugin("com.github.sbt" % "sbt-github-actions" % "0.22.0")
+
 addSbtPlugin("com.github.sbt" % "sbt-dynver" % "5.0.1")
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.2")
 addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.11.1")

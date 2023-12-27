@@ -3,6 +3,7 @@ import sbt.addSbtPlugin
 
 ThisBuild / organization := "io.github.touchdown"
 
+ThisBuild / dynverVTagPrefix := true
 ThisBuild / dynverSeparator := "-"
 // append -SNAPSHOT to version when isSnapshot
 ThisBuild / dynverSonatypeSnapshots := true
@@ -17,7 +18,12 @@ ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
 ThisBuild / scalacOptions ++= Seq("-Ywarn-unused")
 
-ThisBuild / githubWorkflowJavaVersions += JavaSpec.temurin("17")
+ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("17"))
+ThisBuild / crossScalaVersions := Dependencies.Versions.CrossScalaForLib
+ThisBuild / githubWorkflowPublishTargetBranches := Seq(
+  RefPredicate.StartsWith(Ref.Tag("v")),
+  RefPredicate.Equals(Ref.Branch("main"))
+)
 
 val gyremockRuntimeName = "gyremock-runtime"
 val akkaGrpcVersion = "2.1.6"

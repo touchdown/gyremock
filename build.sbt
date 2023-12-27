@@ -20,10 +20,9 @@ ThisBuild / scalacOptions ++= Seq("-Ywarn-unused")
 
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("17"))
 ThisBuild / crossScalaVersions := Dependencies.Versions.CrossScalaForLib
-ThisBuild / githubWorkflowPublishTargetBranches := Seq(
-  RefPredicate.StartsWith(Ref.Tag("v")),
-  RefPredicate.Equals(Ref.Branch("main"))
-)
+ThisBuild / githubWorkflowTargetTags ++= Seq("v*")
+
+ThisBuild / githubWorkflowPublishTargetBranches := Seq()
 
 val gyremockRuntimeName = "gyremock-runtime"
 val akkaGrpcVersion = "2.1.6"

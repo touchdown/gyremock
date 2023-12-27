@@ -1,13 +1,21 @@
 import sbt.Keys.scalaVersion
 import sbt.addSbtPlugin
 
+ThisBuild / organization := "io.github.touchdown"
+
 ThisBuild / dynverSeparator := "-"
 // append -SNAPSHOT to version when isSnapshot
 ThisBuild / dynverSonatypeSnapshots := true
 ThisBuild / versionScheme := Some("early-semver")
 
-ThisBuild / organization := "io.github.touchdown"
 ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
+ThisBuild / publishTo := sonatypePublishToBundle.value
+
+// enable scalafix
+ThisBuild / semanticdbEnabled := true
+ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+
+ThisBuild / scalacOptions ++= Seq("-Ywarn-unused")
 
 val gyremockRuntimeName = "gyremock-runtime"
 val akkaGrpcVersion = "2.1.6"
@@ -16,7 +24,6 @@ lazy val codegen = Project(id = "gyremock-codegen", base = file("codegen"))
   .settings(resolvers += Resolver.sbtPluginRepo("releases"))
   .enablePlugins(BuildInfoPlugin)
   .settings(
-    publishTo := sonatypePublishToBundle.value,
     scalaVersion := Dependencies.Versions.CrossScalaForPlugin.head,
     addSbtPlugin("com.lightbend.akka.grpc" % "sbt-akka-grpc" % akkaGrpcVersion),
     buildInfoKeys ++= Seq[BuildInfoKey](organization, name, version, scalaVersion, sbtVersion),
@@ -27,7 +34,6 @@ lazy val codegen = Project(id = "gyremock-codegen", base = file("codegen"))
 lazy val sbtPlugin = Project(id = "sbt-gyremock", base = file("sbt-plugin"))
   .enablePlugins(SbtPlugin)
   .settings(
-    publishTo := sonatypePublishToBundle.value,
     crossScalaVersions := Dependencies.Versions.CrossScalaForPlugin,
     scalaVersion := Dependencies.Versions.CrossScalaForPlugin.head
   )
@@ -35,7 +41,6 @@ lazy val sbtPlugin = Project(id = "sbt-gyremock", base = file("sbt-plugin"))
 
 lazy val runtime = Project(id = gyremockRuntimeName, base = file("runtime"))
   .settings(
-    publishTo := sonatypePublishToBundle.value,
     crossScalaVersions := Dependencies.Versions.CrossScalaForLib,
     scalaVersion := Dependencies.Versions.CrossScalaForLib.head,
     libraryDependencies := Seq(

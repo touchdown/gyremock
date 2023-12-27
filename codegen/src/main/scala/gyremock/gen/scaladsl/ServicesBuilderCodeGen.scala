@@ -16,7 +16,7 @@ object ServicesBuilderCodeGen extends ScalaCodeGenerator {
   override def run(request: CodeGeneratorRequest, logger: Logger): CodeGeneratorResponse = {
     logger.info("Generating services builder")
     val b = CodeGeneratorResponse.File.newBuilder()
-    val services = getServices(request, logger)
+    val services = getServices(request)
     b.setContent(new ObjectCodeGenerator(services).run())
     b.setName("io/github/touchdown/gyremock/ServicesBuilder.scala")
     CodeGeneratorResponse
@@ -28,7 +28,7 @@ object ServicesBuilderCodeGen extends ScalaCodeGenerator {
 
   // code is copied and pasted from https://github.com/akka/akka-grpc/blob/master/codegen/src/main/scala/akka/grpc/gen/scaladsl/ScalaCodeGenerator.scala
   // will remove once its been fixed to be a protected method upstream
-  private def getServices(request: CodeGeneratorRequest, logger: Logger) = {
+  private def getServices(request: CodeGeneratorRequest) = {
     // Currently per-invocation options, intended to become per-service options eventually
     // https://github.com/akka/akka-grpc/issues/451
     val params = request.getParameter.toLowerCase

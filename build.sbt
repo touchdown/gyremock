@@ -1,28 +1,41 @@
 import sbt.Keys.scalaVersion
 import sbt.addSbtPlugin
 
-ThisBuild / organization := "io.github.touchdown"
+import scala.concurrent.duration._
 
+ThisBuild / organization := "io.github.touchdown"
+ThisBuild / scalaVersion := Dependencies.Versions.scala213
+// versioning
 ThisBuild / dynverVTagPrefix := true
 ThisBuild / dynverSeparator := "-"
-// append -SNAPSHOT to version when isSnapshot
-ThisBuild / dynverSonatypeSnapshots := true
+ThisBuild / dynverSonatypeSnapshots := true // append -SNAPSHOT to version when isSnapshot
 ThisBuild / versionScheme := Some("early-semver")
-
+// publish settings
 ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
-ThisBuild / publishTo := sonatypePublishToBundle.value
-
+sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
 // enable scalafix
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
-
 ThisBuild / scalacOptions ++= Seq("-Ywarn-unused")
-
+// github action settings
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("17"))
-ThisBuild / crossScalaVersions := Dependencies.Versions.CrossScalaForLib
+ThisBuild / githubWorkflowScalaVersions := Dependencies.Versions.CrossScalaForLib
 ThisBuild / githubWorkflowTargetTags ++= Seq("v*")
-
-ThisBuild / githubWorkflowPublishTargetBranches := Seq()
+ThisBuild / githubWorkflowBuildTimeout := Some(20.minutes)
+ThisBuild / githubWorkflowPublishTargetBranches := Seq(RefPredicate.StartsWith(Ref.Tag("v")))
+ThisBuild / githubWorkflowPublish := Seq(
+  WorkflowStep.Sbt(
+    commands = List("ci-release"),
+    name = Some("Publish project"),
+    env = Map(
+      "PGP_PASSPHRASE" -> "${{ secrets.PGP_PASSPHRASE }}",
+      "PGP_SECRET" -> "${{ secrets.PGP_SECRET }}",
+      "SONATYPE_PASSWORD" -> "${{ secrets.SONATYPE_PASSWORD }}",
+      "SONATYPE_USERNAME" -> "${{ secrets.SONATYPE_USERNAME }}"
+    )
+  )
+)
+ThisBuild / githubWorkflowPublishTimeout := Some(10.minutes)
 
 val gyremockRuntimeName = "gyremock-runtime"
 val akkaGrpcVersion = "2.1.6"
@@ -70,5 +83,5 @@ lazy val root = Project(id = "gyremock", base = file("."))
     // version (and set the crossScalaVersions as empty list) so each sub-project
     // can then decide which scalaVersion and crossCalaVersions they use.
     crossScalaVersions := Nil,
-    scalaVersion := Dependencies.Versions.scala212
+    scalaVersion := Dependencies.Versions.scala213
   )

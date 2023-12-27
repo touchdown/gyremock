@@ -15,7 +15,7 @@ lazy val codegen = Project(id = "gyremock-codegen", base = file("codegen"))
     addSbtPlugin("com.lightbend.akka.grpc" % "sbt-akka-grpc" % "2.1.6")
   )
 
-lazy val sbtPlugin = Project(id = "sbt-plugin", base = file("sbt-plugin"))
+lazy val sbtPlugin = Project(id = "sbt-gyremock", base = file("sbt-plugin"))
   .enablePlugins(SbtPlugin)
   .settings(
     crossScalaVersions := Dependencies.Versions.CrossScalaForPlugin,

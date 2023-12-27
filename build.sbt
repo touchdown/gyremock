@@ -3,7 +3,16 @@ import sbt.addSbtPlugin
 
 import scala.concurrent.duration._
 
-ThisBuild / organization := "io.github.touchdown"
+inThisBuild(
+  List(
+    organization := "io.github.touchdown",
+    homepage := Some(url("https://github.com/touchdown/gyremock")),
+    // Alternatively License.Apache2 see https://github.com/sbt/librarymanagement/blob/develop/core/src/main/scala/sbt/librarymanagement/License.scala
+    licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+    developers := List(Developer("touchdown", "Tony Zhao", "daodetony@gmail.com", url("https://github.com/touchdown")))
+  )
+)
+
 ThisBuild / scalaVersion := Dependencies.Versions.scala213
 // versioning
 ThisBuild / dynverVTagPrefix := true

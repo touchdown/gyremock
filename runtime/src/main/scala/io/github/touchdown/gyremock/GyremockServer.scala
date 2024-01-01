@@ -20,13 +20,14 @@ class GyremockServer(settings: GyremockSettings, services: immutable.Seq[Service
   private val printer = new Printer().includingDefaultValueFields
   private val parser = new Parser()
 
-  val wiremockBaseUrl: String = if (settings.wiremockBaseUrl.isEmpty) {
+  val wiremockBaseUrl: String = settings.wiremockBaseUrl.getOrElse {
     val server = new WireMockServer(
       wireMockConfig
         .notifier(new Slf4jNotifier(true))
         .maxRequestJournalEntries(20) // to save some memory
         .usingFilesUnderDirectory("/home/wiremock")
         .globalTemplating(true)
+        .dynamicPort()
     )
     server.start()
     logger.info(s"internal wiremock http server started at ${server.baseUrl}")
@@ -35,7 +36,7 @@ class GyremockServer(settings: GyremockSettings, services: immutable.Seq[Service
       "shutting down internal wiremock server"
     )(() => Future.fromTry(Try(server.stop())).map(_ => Done)(sys.dispatcher))
     server.baseUrl
-  } else settings.wiremockBaseUrl
+  }
 
   private val grpcFromToJson = new GrpcFromToJsonImpl(wiremockBaseUrl, printer, parser)
 

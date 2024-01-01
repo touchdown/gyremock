@@ -11,8 +11,8 @@ object GyremockSettings {
       host = config.getString("host"),
       port = config.getInt("port"),
       stopTimeout = config.getDuration("stop-timeout").toScala,
-      wiremockBaseUrl = config.getString("wiremock-base-url")
+      wiremockBaseUrl = Option.when(config.hasPath("wiremock-base-url"))(config.getString("wiremock-base-url"))
     )
 }
 
-case class GyremockSettings(host: String, port: Int, stopTimeout: FiniteDuration, wiremockBaseUrl: String)
+case class GyremockSettings(host: String, port: Int, stopTimeout: FiniteDuration, wiremockBaseUrl: Option[String])

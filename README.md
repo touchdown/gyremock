@@ -5,7 +5,7 @@ grpc wrapper for wiremock
 This project aims to introduce a translation layer between grpc and json (wiremock). 
 To do so, it relies on the `codegen` logic in the plugin to
 1. have access to proto files
-2. generate said a translation layer for grpc <-> json
+2. generate said translation layer for grpc <-> json
 3. generate an aggregate of all the services generated above
 
 Then, the `runtime` library provides the support needed to run the code generated above.

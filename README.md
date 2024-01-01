@@ -16,13 +16,12 @@ Lastly, the end project still need to write a few lines of code to actually run 
 ## Getting Started
 in your project's `plugins.sbt`
 ```sbt
-addSbtPlugin("io.github.touchdown" % "sbt-gyremock" % "{version}")
+addSbtPlugin("io.github.touchdown" % "sbt-gyremock" % "<version>")
 ```
 then add these lines in your `build.sbt`
 ```sbt
 import gyremock.gen.scaladsl._
 
-libraryDependencies += "io.github.touchdown" %% "gyremock-runtime" % "{version}"
 Compile / akkaGrpcExtraGenerators := Seq(TranslatorCodeGen, ServicesBuilderCodeGen)
 ```
 along with your usual protoc settings

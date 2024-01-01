@@ -79,6 +79,7 @@ lazy val runtime = Project(id = gyremockRuntimeName, base = file("runtime"))
       "com.typesafe.akka" %% "akka-http-core" % "10.2.9",
       "com.thesamet.scalapb" %% "scalapb-json4s" % "0.11.1",
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
+      "org.wiremock" % "wiremock" % "3.3.1",
       "org.scalatest" %% "scalatest" % "3.1.0" % Test
     )
   )

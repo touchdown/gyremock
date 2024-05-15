@@ -12,7 +12,7 @@ import scalapb.json4s.{Parser, Printer}
 
 import scala.collection.immutable
 import scala.concurrent.Future
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 class GyremockServer(settings: GyremockSettings, services: immutable.Seq[Service])(implicit sys: ActorSystem)
     extends StrictLogging {
@@ -49,5 +49,12 @@ class GyremockServer(settings: GyremockSettings, services: immutable.Seq[Service
     Http()
       .newServerAt(interface = settings.host, port = settings.port)
       .bind(handlers)
+      .andThen {
+        case Success(binding) =>
+          logger.info(s"gRPC mock server bound to: ${binding.localAddress}")
+          binding.addToCoordinatedShutdown(settings.stopTimeout)
+        case Failure(exception) =>
+          logger.error(s"exception in binding to ${settings.host}:${settings.port}", exception)
+      }(sys.dispatcher)
   }
 }

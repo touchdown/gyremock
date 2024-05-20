@@ -47,7 +47,7 @@ ThisBuild / githubWorkflowPublish := Seq(
 ThisBuild / githubWorkflowPublishTimeout := Some(10.minutes)
 
 val gyremockRuntimeName = "gyremock-runtime"
-val akkaGrpcVersion = "2.3.4"
+val akkaGrpcVersion = "2.1.6"
 
 lazy val codegen = Project(id = "gyremock-codegen", base = file("codegen"))
   .settings(resolvers += Resolver.sbtPluginRepo("releases"))
@@ -75,7 +75,7 @@ lazy val runtime = Project(id = gyremockRuntimeName, base = file("runtime"))
     libraryDependencies := Seq(
       "ch.qos.logback" % "logback-classic" % "1.4.14" % Runtime,
       "com.lightbend.akka.grpc" %% "akka-grpc-runtime" % akkaGrpcVersion,
-      "com.typesafe.akka" %% "akka-actor" % "2.7.0",
+      "com.typesafe.akka" %% "akka-actor" % "2.6.19",
       "com.typesafe.akka" %% "akka-http-core" % "10.2.9",
       "com.thesamet.scalapb" %% "scalapb-json4s" % "0.12.1",
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",

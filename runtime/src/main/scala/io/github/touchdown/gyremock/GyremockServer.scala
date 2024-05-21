@@ -14,7 +14,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.typesafe.scalalogging.StrictLogging
 import scalapb.json4s.{Parser, Printer}
 
-/** Start a gyremock server by using HttpServerBinding, if the port is zeo, that means we use a dynamic port
+/** Start a gyremock server by using HttpServerBinding, if the port is zero, that means we use a dynamic port
  * */
 class GyremockServer(settings: GyremockSettings, services: immutable.Seq[Service])(implicit sys: ActorSystem)
     extends StrictLogging {

@@ -14,6 +14,8 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.typesafe.scalalogging.StrictLogging
 import scalapb.json4s.{Parser, Printer}
 
+/** Start a gyremock server by using HttpServerBinding, if the port is zero, that means we use a dynamic port
+ * */
 class GyremockServer(settings: GyremockSettings, services: immutable.Seq[Service])(implicit sys: ActorSystem)
     extends StrictLogging {
 
@@ -45,11 +47,11 @@ class GyremockServer(settings: GyremockSettings, services: immutable.Seq[Service
   )
 
   /** binds to designated host and port, and registers to shutdown if bind successful */
-  def run(): Unit = {
+  def run(): Future[Http.ServerBinding] = {
     Http()
       .newServerAt(interface = settings.host, port = settings.port)
       .bind(handlers)
-      .onComplete {
+      .andThen {
         case Success(binding) =>
           logger.info(s"gRPC mock server bound to: ${binding.localAddress}")
           binding.addToCoordinatedShutdown(settings.stopTimeout)

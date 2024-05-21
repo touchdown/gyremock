@@ -1,5 +1,9 @@
 package io.github.touchdown.gyremock
 
+import scala.collection.immutable
+import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
+
 import akka.Done
 import akka.actor.{ActorSystem, CoordinatedShutdown}
 import akka.grpc.scaladsl.{ServerReflection, ServiceHandler}
@@ -9,10 +13,6 @@ import com.github.tomakehurst.wiremock.common.Slf4jNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.typesafe.scalalogging.StrictLogging
 import scalapb.json4s.{Parser, Printer}
-
-import scala.collection.immutable
-import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
 
 /** Start a gyremock server by using HttpServerBinding, if the port is zeo, that means we use a dynamic port
  * */

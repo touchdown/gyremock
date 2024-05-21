@@ -14,6 +14,8 @@ import scala.collection.immutable
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
+/** Start a gyremock server by using HttpServerBinding, if the port is zeo, that means we use a dynamic port
+ * */
 class GyremockServer(settings: GyremockSettings, services: immutable.Seq[Service])(implicit sys: ActorSystem)
     extends StrictLogging {
 

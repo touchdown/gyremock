@@ -1,16 +1,11 @@
 package io.github.touchdown.gyremock
 
-import scala.concurrent.duration.{DurationInt, FiniteDuration}
+import scala.concurrent.duration.FiniteDuration
 import scala.jdk.DurationConverters._
+
 import com.typesafe.config.Config
-import io.github.touchdown.gyremock.GyremockSettings.{dynamicPort, localhost}
 
 object GyremockSettings {
-  private val localhost = "127.0.0.1"
-
-  // when we set port = 0, that means we will use dynamic port
-  private val dynamicPort = 0
-
   def apply(config: Config): GyremockSettings =
     GyremockSettings(
       host = config.getString("host"),
@@ -20,4 +15,4 @@ object GyremockSettings {
     )
 }
 
-case class GyremockSettings(host: String = localhost, port: Int = dynamicPort, stopTimeout: FiniteDuration = 10.seconds, wiremockBaseUrl: Option[String])
+case class GyremockSettings(host: String, port: Int, stopTimeout: FiniteDuration, wiremockBaseUrl: Option[String])

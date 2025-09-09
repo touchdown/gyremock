@@ -3,6 +3,8 @@ import sbt.addSbtPlugin
 
 import scala.concurrent.duration._
 
+import xerial.sbt.Sonatype.{sonatype01, sonatypeCentralHost}
+
 inThisBuild(
   List(
     organization := "io.github.touchdown",
@@ -20,8 +22,8 @@ ThisBuild / dynverSeparator := "-"
 ThisBuild / dynverSonatypeSnapshots := true // append -SNAPSHOT to version when isSnapshot
 ThisBuild / versionScheme := Some("early-semver")
 // publish settings
-ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
-sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
+ThisBuild / sonatypeCredentialHost := sonatype01
+ThisBuild / sonatypeRepository := sonatypeCentralHost
 // enable scalafix
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision

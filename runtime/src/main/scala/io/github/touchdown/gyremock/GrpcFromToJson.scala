@@ -33,13 +33,16 @@ class GrpcFromToJsonImpl(wiremockBaseUrl: String, jsPrinter: Printer, jsParser: 
     extends GrpcFromToJson
     with StrictLogging {
 
+  val httpClient = HttpClient.newHttpClient
+
   private def translate(json: String, path: String) = {
     val request = HttpRequest.newBuilder
       .header("Content-Type", "application/json")
       .uri(URI.create(wiremockBaseUrl + path))
       .POST(HttpRequest.BodyPublishers.ofString(json))
       .build
-    HttpClient.newHttpClient
+
+    httpClient
       .sendAsync(request, HttpResponse.BodyHandlers.ofString)
       .toScala
   }
